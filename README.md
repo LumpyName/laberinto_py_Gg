@@ -38,7 +38,10 @@ Puedes personalizar el juego cambiando los caracteres del jugador y del laberint
 
 ## Contribuciones
 
-Las contribuciones son bienvenidas. Si tienes alguna idea para mejorar el juego, siéntete libre de abrir un pull request.
+Las contribuciones son bienvenidas. Si tienes alguna idea para mejorar el juego, Puedes entrar al grupo de Whatsapp.
+https://chat.whatsapp.com/CbxlcoclN8p8qArUNnMPTY
+Esque nose manejar GITHUB
+*le da pena*
 
 ## Créditos
 
