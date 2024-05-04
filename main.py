@@ -59,7 +59,7 @@ class Jugador:
     def probando(self):
         print("Sep se realiza cambios en tiempo real")
 
-jugador = Jugador('☺', 21, 2, "Andres")
+jugador = Jugador('☺', 21, 2, "Lumpy")
 laberinto = Laberinto(jugador)
 system("clear")
 print(laberinto)
