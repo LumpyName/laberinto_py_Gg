@@ -45,4 +45,4 @@ Esque nose manejar GITHUB\
 
 ## Créditos
 
-Este juego fue creado por un Otaku XD como proyecto de aprendizaje en Python.
+Este juego fue creado por un Otaku (jajajajaja) como proyecto de aprendizaje en Python.
