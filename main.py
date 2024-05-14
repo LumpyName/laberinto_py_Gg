@@ -7,10 +7,6 @@ class Laberinto:
 
     def __init__(self, jugador):
         self.jugador = jugador
-        self._mapa = self._generar_mapa()
-        self.juego_terminado = False
-
-    def _generar_mapa(self):
         mapa = [[' ' for _ in range(60)] for _ in range(23)]
         mapa[0] = ['╔'] + ['═' for _ in range(58)] + ['╗']
         mapa[1] = ['║'] + [' ' for _ in range(58)] + [' ']
@@ -19,9 +15,9 @@ class Laberinto:
         mapa[-2] = list('╚   ') + ['═' for _ in range(55)] + ['╝']
         mapa[-1] = list('  Start')
         mapa[self.jugador.eje_x][self.jugador.eje_y] = self.jugador.cuerpo_jugador
-        return mapa
+        self._mapa = mapa
 
-    def move(self, direccion):
+    def moveAndTrack(self, direccion, track=' '):
         movimientos = {
             "above": (-1, 0),
             "below": (1, 0),
@@ -29,21 +25,79 @@ class Laberinto:
             "right": (0, 1)
         }
         dx, dy = movimientos[direccion]
-        x, y = self.jugador.eje_x + dx, self.jugador.eje_y + dy
+        old_x, old_y = self.jugador.eje_x, self.jugador.eje_y
+        new_x, new_y = old_x + dx, old_y + dy
+        cuerpo_jugador = self.jugador.cuerpo_jugador
+
+        def realizarMovimiento():
+            # Realizando el movimiento...
+            self._mapa[old_x][old_y] = track
+            self._mapa[new_x][new_y] = cuerpo_jugador
+
+            # Guardando posicion del jugador
+            self.jugador.eje_x = new_x
+            self.jugador.eje_y = new_y
+
         if direccion in ["above", "below"]:
-            v_y = (1, -1) if direccion == "above" else (1, -1)
-            if 0 <= x < 22 and 0 <= y < 60 and self._mapa[x][y + v_y[0]] == self._mapa[x][y + v_y[1]] == " ":
-                self._mapa[x][y] = self._mapa[self.jugador.eje_x][self.jugador.eje_y]
-                self._mapa[self.jugador.eje_x][self.jugador.eje_y] = " "
-                self.jugador.eje_x, self.jugador.eje_y = x, y
+            if self.is_trapped(direccion):
+                realizarMovimiento()
+
         elif direccion in ["left", "right"]:
-            try:
-                if 0 <= x < 22 and 0 <= y < 60 and self._mapa[self.jugador.eje_x][y] == " " and self._mapa[self.jugador.eje_x][y + (1 if direccion == "right" else -1)] == " ":
-                    self._mapa[self.jugador.eje_x][y] = self._mapa[self.jugador.eje_x][self.jugador.eje_y]
-                    self._mapa[self.jugador.eje_x][self.jugador.eje_y] = " "
-                    self.jugador.eje_y = y
-            except IndexError:
+            if self.is_trapped(direccion):
+                realizarMovimiento()
+            else:
+                self._ganador(direccion)
+
+    def _ganador(self, direccion):
+        cuerpo_jugador = self.jugador.cuerpo_jugador
+        if direccion == "right":
+            coor = (self.jugador.eje_x, self.jugador.eje_y)
+            if coor == (1, 58):
+                self._mapa[coor[0]][coor[1]] = ' '
+                self._mapa[coor[0]][coor[1] + 1] = cuerpo_jugador
                 self.juego_terminado = True
+
+    def is_trapped(self, side):
+        # Se obtiene la ubicacion del cuerpo del jugador
+        dx, dy = self.jugador.eje_x, self.jugador.eje_y
+
+        # Verificar si tiene para ir a la derecha
+        if side == "right":
+            var_1 = self._mapa[dx][dy + 1: dy + 3]
+            return var_1 == [" "] * 2
+
+        # Verificar si tiene para ir a la izquierda
+        elif side == "left":
+            var_1 = self._mapa[dx][dy - 2: dy]
+            return var_1 == [" "] * 2
+
+        # Verificar si tiene para ir a la arriba
+        elif side == "above":
+            for x in range(dy - 1, dy + 2):
+                if self._mapa[dx - 1][x] != " ":
+                    break
+            else:
+                return True
+
+        # Verificar si tiene para ir a la abajo
+        elif side == "below":
+            for x in range(dy - 1, dy + 2):
+                if self._mapa[dx + 1][x] != " ":
+                    break
+            else:
+                return True
+
+    # Es una herramienta que nos servira mas tarde
+    def actualizar(self, new_x, new_y):
+        old_x, old_y = self.jugador.eje_x, self.jugador.eje_y
+        self._mapa[old_x][old_y] = "#"
+        self._mapa[new_x][new_y] = self.jugador.cuerpo_jugador
+        if self._mapa[1][59] == self.jugador.cuerpo_jugador:
+            self.jugador.juego_terminado = True
+        self.jugador.eje_x = new_x
+        self.jugador.eje_y = new_y
+
+        return False
         
     def __str__(self):
         return '\n'.join([''.join(fila) for fila in self._mapa])
@@ -54,47 +108,61 @@ class Jugador:
         self.cuerpo_jugador = cuerpo_jugador
         self.eje_x = eje_x
         self.eje_y = eje_y
-        self.nombre = "(" + nombre + ")"
+        self.nombre = nombre
+        self.juego_terminado = False
 
-    def probando(self):
-        print("Sep se realiza cambios en tiempo real")
-
-jugador = Jugador('☺', 21, 2, "Lumpy")
-laberinto = Laberinto(jugador)
-system("clear")
-print(laberinto)
+    def get_position(self):
+        return (self.eje_x, self.eje_y)
 
 def on_key_press(key):
     key = str(key)
     match key:
         case "Key.up":
-            laberinto.move("above")
+            laberinto.moveAndTrack("above")
         case "Key.down":
-            laberinto.move("below")
+            laberinto.moveAndTrack("below")
         case "Key.right":
-            laberinto.move("right")
+            laberinto.moveAndTrack("right")
         case "Key.left":
-            laberinto.move("left")
+            laberinto.moveAndTrack("left")
         case "'q'":
             return False
     if laberinto.juego_terminado:
-        system("clear")
-        for _ in range(9):
-            print()
-        print("      ____                            _          ")
-        print("     / ___|  __ _  _ __    __ _  ___ | |_   ___  ")
-        print("    | |  _  / _` || '_ \  / _` |/ __|| __| / _ \ ")
-        print("    | |_| || (_| || | | || (_| |\__ \| |_ |  __/ ")
-        print("     \____| \__,_||_| |_| \__,_||___/ \__| \___| ")
-        print()
-        print(jugador.nombre.center(44))
-        for _ in range(8):
-            print()
         return False
     else:
         system("clear")
         print(laberinto)
 
+def get_print_ganador(mapa):
+    texts = [
+        list("   ____                            _          "),
+        list("  / ___|  __ _  _ __    __ _  ___ | |_   ___  "),
+        list(" | |  _  / _` || '_ \  / _` |/ __|| __| / _ \ "),
+        list(" | |_| || (_| || | | || (_| |\__ \| |_ |  __/ "),
+        list("  \____| \__,_||_| |_| \__,_||___/ \__| \___| "),
+        list(f" ╔{'═'*(len(jugador.nombre) + 2)}╗ "),
+        list(f" ║ {jugador.nombre} ║ "),
+        list(f" ╚{'═'*(len(jugador.nombre) + 2)}╝ ")
+    ]
+    indice_inicio = len(mapa) // 2 - (len(texts)) // 2
+
+    for num, line in enumerate(texts):
+        var_1 = indice_inicio + num
+        indice_linea = len(mapa[var_1]) // 2 - (len(line)) // 2
+        mapa[var_1][indice_linea : indice_linea + len(line)] = line
+
+    return mapa
+
 if __name__ == "__main__":
+    jugador = Jugador('☺', 21, 2, "Lumpy")
+    laberinto = Laberinto(jugador)
+    system("clear")
+    print(laberinto)
+    
     with keyboard.Listener(on_press=on_key_press) as listener:
         listener.join()
+
+    # Para imprimir un buen mensaje de que gano
+    system("clear")
+    print_mapa = get_print_ganador(laberinto.getMapa())
+    print("\n".join(["".join(fila) for fila in print_mapa]))
