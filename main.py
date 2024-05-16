@@ -98,7 +98,10 @@ class Laberinto:
         self.jugador.eje_y = new_y
 
         return False
-        
+
+    def getMapa(self):
+        return self._mapa
+    
     def __str__(self):
         return '\n'.join([''.join(fila) for fila in self._mapa])
 
@@ -127,7 +130,7 @@ def on_key_press(key):
             laberinto.moveAndTrack("left")
         case "'q'":
             return False
-    if laberinto.juego_terminado:
+    if jugador.juego_terminado:
         return False
     else:
         system("clear")
