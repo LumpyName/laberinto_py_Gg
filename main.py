@@ -55,7 +55,7 @@ class Laberinto:
             if coor == (1, 58):
                 self._mapa[coor[0]][coor[1]] = ' '
                 self._mapa[coor[0]][coor[1] + 1] = cuerpo_jugador
-                self.juego_terminado = True
+                self.jugador.juego_terminado = True
 
     def is_trapped(self, side):
         # Se obtiene la ubicacion del cuerpo del jugador
