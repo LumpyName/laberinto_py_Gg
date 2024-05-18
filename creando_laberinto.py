@@ -31,6 +31,7 @@ while salir == False:
     laberinto = Laberinto(jugador)
     
     while True:
+        sleep(0.05)        
         system("clear")
         print(laberinto)
         movimientos = movimiento(jugador)
