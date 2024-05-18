@@ -6,6 +6,9 @@ Este es un simple juego de laberinto ASCII implementado en Python. El juego perm
 
 - Python 3.x
 
+## Librerias
+- pynput 1.7.7
+
 ## Instalación
 
 1. Clona este repositorio en tu máquina local:
